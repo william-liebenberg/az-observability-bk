@@ -17,11 +17,24 @@ env:
 
 steps:
 
+  - label: ":azure: Install Azure CLI & Login"
+    key: "azure-setup"
+    command:
+      - "bash ops/scripts/install-az.sh"
+    retry:
+      automatic:
+        - exit_status: "*"
+          limit: 2
+    timeout_in_minutes: 10
+
   - label: "Obtain Azure OIDC token"
     key: "oidc-token"
     command: |
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
+
+
+
       
   - label: ":package: Package Function App"
     key: "package"
