@@ -53,7 +53,7 @@ steps:
       echo "Logging in to Azure tenant $$ARM_TENANT_ID / $$ARM_CLIENT_ID with OIDC token $$BK_OIDC_TOKEN"
 
       echo "The token length is: ${#BUILDKITE_OIDC_TOKEN}"
-      echo "The token length is: $${#BK_OIDC_TOKEN}"
+      echo "The token length is: ${#BK_OIDC_TOKEN}"
 
       az login --service-principal --username "${DEV_AZURE_CLIENT_ID}" --tenant "${AZURE_TENANT_ID}" --federated-token "$$BUILDKITE_OIDC_TOKEN"
       
