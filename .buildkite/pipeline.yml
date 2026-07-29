@@ -27,6 +27,8 @@ steps:
     command: |
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
+      echo "The OIDC token is: $BUILDKITE_OIDC_TOKEN"
+      echo "The OIDC token length is: ${#BUILDKITE_OIDC_TOKEN}"
       
   - label: ":package: Package Function App"
     key: "package"
