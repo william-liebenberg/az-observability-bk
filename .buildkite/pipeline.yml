@@ -32,7 +32,11 @@ steps:
       
       echo "Setting Azure subscription to $DEV_AZURE_SUBSCRIPTION_ID..."
       az account set -s "$DEV_AZURE_SUBSCRIPTION_ID"
-      
+    plugins:
+      - azure-login#v1.0.1:
+          use-identity: true
+          client-id: "${DEV_AZURE_CLIENT_ID}"
+
   - label: ":package: Package Function App"
     key: "package"
     depends_on: "oidc-token"
@@ -53,6 +57,10 @@ steps:
       bash ops/scripts/deploy-function.sh dev
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
+    plugins:
+      - azure-login#v1.0.1:
+          use-identity: true
+          client-id: "${DEV_AZURE_CLIENT_ID}"
 
   - label: ":test_tube: Smoke test dev"
     key: "smoke-dev"
@@ -78,6 +86,10 @@ steps:
       bash ops/scripts/deploy-function.sh prod
     agents:
       queue: "${PROD_DEPLOY_QUEUE}"
+    plugins:
+      - azure-login#v1.0.1:
+          use-identity: true
+          client-id: "${PROD_AZURE_CLIENT_ID}"
 
   - label: ":test_tube: Smoke test prod"
     key: "smoke-prod"
