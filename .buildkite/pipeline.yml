@@ -15,6 +15,9 @@ env:
   PROD_AZURE_SUBSCRIPTION_ID: "43b7a2aa-b2f7-408e-a4ad-26dd069437df"
   PROD_DEPLOY_QUEUE: "my-super-secret-buildkite-agent-queue"
 
+agents:
+    queue: "${DEV_DEPLOY_QUEUE}"
+
 steps:
 
   - label: "Obtain Azure OIDC token"
@@ -22,6 +25,8 @@ steps:
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
     command: |
+      echo "Installing Azure CLI..."
+      bash ops/scripts/install-az.sh
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
       
@@ -33,44 +38,39 @@ steps:
       - "artifacts/*.zip"
       - "artifacts/*.zip.sha256"
       - "artifacts/*.zip.manifest"
-    agents:
-      queue: "${DEV_DEPLOY_QUEUE}"
 
   - label: ":azure: Deploy dev"
     key: "deploy-dev"
     branches: "main"
     depends_on: "package"
     env:
-      ARM_CLIENT_ID: $DEV_AZURE_CLIENT_ID
-      BUILDKITE_OIDC_TOKEN: $BUILDKITE_OIDC_TOKEN
-      ARM_TENANT_ID: $AZURE_TENANT_ID
-      ARM_SUBSCRIPTION_ID: $DEV_AZURE_SUBSCRIPTION_ID
-    command: |
-      echo "Installing Azure CLI..."
-      bash ops/scripts/install-az.sh
-      
-      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${DEV_AZURE_CLIENT_ID} with OIDC token $BUILDKITE_OIDC_TOKEN"
-      echo "Logging in to Azure tenant $ARM_TENANT_ID / $ARM_CLIENT_ID with OIDC token $BUILDKITE_OIDC_TOKEN"
+      ARM_CLIENT_ID: ${DEV_AZURE_CLIENT_ID}
+      BK_OIDC_TOKEN: ${BUILDKITE_OIDC_TOKEN}
+      ARM_TENANT_ID: ${AZURE_TENANT_ID}
+      ARM_SUBSCRIPTION_ID: ${DEV_AZURE_SUBSCRIPTION_ID}
+    command: |      
+      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${DEV_AZURE_CLIENT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
+      echo "Logging in to Azure tenant $$ARM_TENANT_ID / $$ARM_CLIENT_ID with OIDC token $$BK_OIDC_TOKEN"
 
       echo "The token length is: ${#BUILDKITE_OIDC_TOKEN}"
+      echo "The token length is: $${#BK_OIDC_TOKEN}"
 
-      az login --service-principal --username "${DEV_AZURE_CLIENT_ID}" --tenant "${AZURE_TENANT_ID}" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      az login --service-principal --username "${DEV_AZURE_CLIENT_ID}" --tenant "${AZURE_TENANT_ID}" --federated-token "$$BUILDKITE_OIDC_TOKEN"
       
       echo "Setting Azure subscription to $ARM_SUBSCRIPTION_ID..."
       az account set -s "$ARM_SUBSCRIPTION_ID"
 
       echo "Deploying Function App to dev environment..."
       bash ops/scripts/deploy-function.sh dev
-    agents:
-      queue: "${DEV_DEPLOY_QUEUE}"
-
+    
   - label: ":test_tube: Smoke test dev"
     key: "smoke-dev"
     branches: "main"
     depends_on: "deploy-dev"
     command: "bash ops/scripts/smoke-test.sh \"${DEV_SMOKE_URL}\""
-    agents:
-      queue: "${DEV_DEPLOY_QUEUE}"
+
+
+
 
   - block: ":rocket: Deploy to prod"
     key: "approve-prod"
@@ -86,14 +86,10 @@ steps:
       az login --service-principal --username "$PROD_AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
       az account set -s "$PROD_AZURE_SUBSCRIPTION_ID"
       bash ops/scripts/deploy-function.sh prod
-    agents:
-      queue: "${PROD_DEPLOY_QUEUE}"
 
   - label: ":test_tube: Smoke test prod"
     key: "smoke-prod"
     branches: "main"
     depends_on: "deploy-prod"
     command: "bash ops/scripts/smoke-test.sh \"${PROD_SMOKE_URL}\""
-    agents:
-      queue: "${PROD_DEPLOY_QUEUE}"
 
