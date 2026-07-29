@@ -52,7 +52,7 @@ echo "Validating Function App hosting plan SKU"
 plan_id="$(az functionapp show \
   --resource-group "$resource_group" \
   --name "$function_app" \
-  --query serverFarmId \
+  --query properties.serverFarmId \
   --output tsv)"
 test -n "$plan_id"
 actual_plan_sku="$(az appservice plan show --ids "$plan_id" --query sku.name --output tsv)"
