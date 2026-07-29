@@ -8,10 +8,12 @@ body_file="$(mktemp)"
 trap 'rm -f "$body_file"' EXIT
 
 for ((attempt = 1; attempt <= attempts; attempt++)); do
+  echo "Smoke test attempt ${attempt}/${attempts} for ${url}"
   status="$(curl --silent --show-error --output "$body_file" \
     --write-out '%{http_code}' --max-time 10 "$url" || true)"
   if [[ "$status" == "200" ]]; then
     cat "$body_file"
+    echo "✅ Smoke test succeeded after ${attempt} attempts"
     exit 0
   fi
 
@@ -19,5 +21,6 @@ for ((attempt = 1; attempt <= attempts; attempt++)); do
   sleep "$delay"
 done
 
+echo "Smoke test failed after ${attempts} attempts" >&2
 cat "$body_file" >&2
 exit 1
