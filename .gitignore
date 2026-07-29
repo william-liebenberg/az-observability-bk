@@ -1,0 +1,11 @@
+node_modules/
+dist/
+local.settings.json
+.env
+*.log
+.DS_Store
+.artifacts/
+artifacts/
+AzuriteConfig
+__azurite*.**
+__**__/

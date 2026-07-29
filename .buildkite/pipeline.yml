@@ -1,0 +1,82 @@
+env:
+  APP_NAME: "azobservability-funcapp"
+  DEV_FUNCTION_APP_NAME: "coffeeobs-func-45hsfjth6qdyi"
+  DEV_RESOURCE_GROUP: "rg-coffee-observability"
+  DEV_SMOKE_URL: "https://coffeeobs-func-45hsfjth6qdyi.azurewebsites.net/api/health"
+  DEV_AZURE_CLIENT_ID: "8d642690-6ec7-46a9-b2e2-491534513d78"
+  DEV_AZURE_SUBSCRIPTION_ID: "43b7a2aa-b2f7-408e-a4ad-26dd069437df"
+  DEV_DEPLOY_QUEUE: "my-super-secret-buildkite-agent-queue"
+  PROD_FUNCTION_APP_NAME: "coffeeobs-func-45hsfjth6qdyi"
+  PROD_RESOURCE_GROUP: "rg-coffee-observability"
+  PROD_SMOKE_URL: "https://coffeeobs-func-45hsfjth6qdyi.azurewebsites.net/api/health"
+  PROD_AZURE_CLIENT_ID: "8d642690-6ec7-46a9-b2e2-491534513d78"
+  PROD_AZURE_SUBSCRIPTION_ID: "43b7a2aa-b2f7-408e-a4ad-26dd069437df"
+  PROD_DEPLOY_QUEUE: "my-super-secret-buildkite-agent-queue"
+
+steps:
+  - group: ":test_tube: Validate"
+    steps:
+      - label: ":lint-roller: Lint"
+        key: "lint"
+        command: "npm ci && npm run lint"
+
+      - label: ":test_tube: Unit tests"
+        key: "unit-tests"
+        command: "npm ci && npm test"
+
+  - label: ":package: Package Function App"
+    key: "package"
+    depends_on:
+      - "lint"
+      - "unit-tests"
+    command: "bash ops/scripts/package-function.sh"
+    artifact_paths:
+      - "artifacts/*.zip"
+      - "artifacts/*.zip.sha256"
+      - "artifacts/*.zip.manifest"
+
+  - label: ":azure: Deploy dev"
+    key: "deploy-dev"
+    branches: "main"
+    depends_on: "package"
+    command: "bash ops/scripts/deploy-function.sh dev"
+    agents:
+      queue: "${DEV_DEPLOY_QUEUE}"
+    concurrency: 1
+    concurrency_group: "${APP_NAME}/dev"
+    plugins:
+      - willdev-ops/buildkite-oidc-azure#v2.0.0:
+          client-id: "${DEV_AZURE_CLIENT_ID}"
+          subscription-id: "${DEV_AZURE_SUBSCRIPTION_ID}"
+
+  - label: ":test_tube: Smoke test dev"
+    key: "smoke-dev"
+    branches: "main"
+    depends_on: "deploy-dev"
+    command: "bash ops/scripts/smoke-test.sh \"${DEV_SMOKE_URL}\""
+
+  - block: ":rocket: Deploy to prod"
+    key: "approve-prod"
+    branches: "main"
+    depends_on: "smoke-dev"
+
+  - label: ":azure: Deploy prod"
+    key: "deploy-prod"
+    branches: "main"
+    depends_on: "approve-prod"
+    command: "bash ops/scripts/deploy-function.sh prod"
+    agents:
+      queue: "${PROD_DEPLOY_QUEUE}"
+    concurrency: 1
+    concurrency_group: "${APP_NAME}/prod"
+    plugins:
+      - willdev-ops/buildkite-oidc-azure#v2.0.0:
+          client-id: "${PROD_AZURE_CLIENT_ID}"
+          subscription-id: "${PROD_AZURE_SUBSCRIPTION_ID}"
+
+  - label: ":test_tube: Smoke test prod"
+    key: "smoke-prod"
+    branches: "main"
+    depends_on: "deploy-prod"
+    command: "bash ops/scripts/smoke-test.sh \"${PROD_SMOKE_URL}\""
+

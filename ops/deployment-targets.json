@@ -1,0 +1,57 @@
+{
+  "applicationType": "function-package",
+  "promotionOrder": [
+    "dev",
+    "stage",
+    "prod"
+  ],
+  "oidcPlugin": "willdev-ops/buildkite-oidc-azure#v2.0.0",
+  "releaseName": "azobservability-funcapp",
+  "releaseAssumeRoleArn": "arn:aws:iam::00000000-0000-0000-0000-000000000000:role/release-genie",
+  "operatingSystem": "linux",
+  "buildMode": "local-ready-to-run",
+  "environments": {
+    "dev": {
+      "functionAppName": "observability-funcapp-dev-123ghg",
+      "resourceGroup": "rg-observability-funcapp-dev",
+      "hostingPlanSku": "FC1",
+      "smokeInput": "https://observability-funcapp-dev-123ghg.azurewebsites.net/api/health",
+      "azureClientId": "111111111-1111-1111-1111-1111111111111",
+      "azureSubscriptionId": "22222222-2222-2222-2222-222222222222",
+      "deploymentQueue": "my-super-secret-buildkite-agent-queue",
+      "promotionTrigger": {
+        "type": "branch",
+        "branchFilter": "main"
+      },
+      "approvalRequired": false
+    },
+    "stage": {
+      "functionAppName": "observability-funcapp-stage-123ghg",
+      "resourceGroup": "rg-observability-funcapp-stage",
+      "hostingPlanSku": "FC1",
+      "smokeInput": "https://observability-funcapp-stage-123ghg.azurewebsites.net/api/health",
+      "azureClientId": "333333333-3333-3333-3333-333333333333",
+      "azureSubscriptionId": "44444444-4444-4444-4444-444444444444",
+      "deploymentQueue": "my-super-secret-buildkite-agent-queue",
+      "promotionTrigger": {
+        "type": "branch",
+        "branchFilter": "main"
+      },
+      "approvalRequired": false
+    },
+    "prod": {
+      "functionAppName": "observability-funcapp-prod-123ghg",
+      "resourceGroup": "rg-observability-funcapp-prod",
+      "hostingPlanSku": "FC1",
+      "smokeInput": "https://observability-funcapp-prod-123ghg.azurewebsites.net/api/health",
+      "azureClientId": "55555555-5555-5555-5555-555555555555",
+      "azureSubscriptionId": "66666666-6666-6666-6666-666666666666",
+      "deploymentQueue": "my-super-secret-buildkite-agent-queue",
+      "promotionTrigger": {
+        "type": "branch",
+        "branchFilter": "main"
+      },
+      "approvalRequired": true
+    }
+  }
+}

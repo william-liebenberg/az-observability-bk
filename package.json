@@ -1,0 +1,29 @@
+{
+  "name": "azure-observability-coffee-demo",
+  "version": "1.0.0",
+  "description": "Azure Functions TypeScript demo for Azure observability deep dives using Service Bus, Application Insights, Cosmos DB, and Blob Storage.",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "start": "npm run build && func start",
+    "test": "npm run build && node --test dist/test/orders.test.js",
+    "watch": "tsc --watch",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.2.0",
+    "@azure/functions": "^4.6.0",
+    "@azure/service-bus": "^7.9.5",
+    "@azure/storage-blob": "^12.25.0",
+    "applicationinsights": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
