@@ -49,8 +49,9 @@ steps:
       echo "Installing Azure CLI..."
       bash ops/scripts/install-az.sh
       
-      echo "Logging in to Azure tenant $ARM_TENANT_ID with OIDC token " $BUILDKITE_OIDC_TOKEN
-      az login --service-principal --username "$ARM_CLIENT_ID" --tenant "$ARM_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      echo "Logging in to Azure tenant ${ARM_TENANT_ID} / ${DEV_AZURE_CLIENT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
+      echo "Logging in to Azure tenant ${ARM_TENANT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
+      az login --service-principal --username "${ARM_CLIENT_ID}" --tenant "${ARM_TENANT_ID}" --federated-token "${BUILDKITE_OIDC_TOKEN}"
       
       echo "Setting Azure subscription to $ARM_SUBSCRIPTION_ID..."
       az account set -s "$ARM_SUBSCRIPTION_ID"
