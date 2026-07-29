@@ -22,17 +22,28 @@ command -v unzip >/dev/null 2>&1 || {
   exit 1
 }
 
+echo "Cleaning up old artifacts"
 rm -rf "$package_dir" "$package" "$checksum" "$manifest"
+
+echo "Installing dependencies and building the Function App"
 npm ci
+
+echo "Building the Function App"
 npm run build
 
+echo "Packaging the Function App"
 mkdir -p "$package_dir/dist"
 cp host.json package.json package-lock.json "$package_dir/"
 cp -R dist/src "$package_dir/dist/"
 npm ci --omit=dev --prefix "$package_dir"
 
+echo "Creating zip package"
 (cd "$package_dir" && zip -qr "../../../${package}" .)
+
+echo "Verifying package contents"
 unzip -Z1 "$package" | grep -qx "host.json"
+
+echo "Generating checksum"
 sha256sum "$package" > "$checksum"
 
 cat > "$manifest" <<EOF
@@ -42,4 +53,5 @@ build_number=${build_number}
 sha256=$(sha256sum "$package" | cut -d ' ' -f 1)
 EOF
 
+echo "Package created: $package"
 unzip -l "$package"
