@@ -8,12 +8,14 @@ env:
   DEV_AZURE_CLIENT_ID: "8d642690-6ec7-46a9-b2e2-491534513d78"
   DEV_AZURE_SUBSCRIPTION_ID: "43b7a2aa-b2f7-408e-a4ad-26dd069437df"
   DEV_DEPLOY_QUEUE: "my-super-secret-buildkite-agent-queue"
+  DEV_HOSTING_PLAN_SKU: "FC1"
   PROD_FUNCTION_APP_NAME: "coffeeobs-func-45hsfjth6qdyi"
   PROD_RESOURCE_GROUP: "rg-coffee-observability"
   PROD_SMOKE_URL: "https://coffeeobs-func-45hsfjth6qdyi.azurewebsites.net/api/health"
   PROD_AZURE_CLIENT_ID: "8d642690-6ec7-46a9-b2e2-491534513d78"
   PROD_AZURE_SUBSCRIPTION_ID: "43b7a2aa-b2f7-408e-a4ad-26dd069437df"
   PROD_DEPLOY_QUEUE: "my-super-secret-buildkite-agent-queue"
+  PROD_HOSTING_PLAN_SKU: "FC1"
 
 agents:
     queue: "${DEV_DEPLOY_QUEUE}"
