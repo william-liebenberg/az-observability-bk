@@ -1,5 +1,5 @@
 env:
-  AZURE_TENANT_ID: "your-azure-tenant-id"
+  AZURE_TENANT_ID: "096aab35-433f-420f-83de-602352e62125"
   
   APP_NAME: "azobservability-funcapp"
   DEV_FUNCTION_APP_NAME: "coffeeobs-func-45hsfjth6qdyi"
