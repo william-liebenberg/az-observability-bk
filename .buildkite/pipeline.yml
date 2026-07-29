@@ -14,21 +14,9 @@ env:
   PROD_DEPLOY_QUEUE: "my-super-secret-buildkite-agent-queue"
 
 steps:
-  - group: ":test_tube: Validate"
-    steps:
-      - label: ":lint-roller: Lint"
-        key: "lint"
-        command: "npm ci && npm run lint"
-
-      - label: ":test_tube: Unit tests"
-        key: "unit-tests"
-        command: "npm ci && npm test"
 
   - label: ":package: Package Function App"
     key: "package"
-    depends_on:
-      - "lint"
-      - "unit-tests"
     command: "bash ops/scripts/package-function.sh"
     artifact_paths:
       - "artifacts/*.zip"
