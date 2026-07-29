@@ -2,7 +2,11 @@
 set -euo pipefail
 
 echo "Installing zip and unzip"
-apt-get update && apt-get upgrade -y zip unzip
+apt-get update && apt-get install -y zip unzip
+
+echo "upgrading packages"
+apt-get upgrade -y
+
 echo "done installing zip and unzip"
 
 app_name="${APP_NAME:?APP_NAME is required}"
