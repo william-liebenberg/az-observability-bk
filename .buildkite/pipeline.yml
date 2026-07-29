@@ -25,13 +25,6 @@ steps:
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
       
-      echo "Installing Azure CLI..."
-      bash ops/scripts/install-az.sh
-    plugins:
-      - azure-login#v1.0.1:
-          use-identity: true
-          client-id: "${DEV_AZURE_CLIENT_ID}"
-
   - label: ":package: Package Function App"
     key: "package"
     depends_on: "oidc-token"
@@ -47,15 +40,25 @@ steps:
     key: "deploy-dev"
     branches: "main"
     depends_on: "package"
+    env:
+      ARM_CLIENT_ID: ${DEV_AZURE_CLIENT_ID}
+      BUILDKITE_OIDC_TOKEN: ${BUILDKITE_OIDC_TOKEN}
+      ARM_TENANT_ID: "${AZURE_TENANT_ID}"
+      ARM_SUBSCRIPTION_ID: "${DEV_AZURE_SUBSCRIPTION_ID}"
     command: |
+      echo "Installing Azure CLI..."
+      bash ops/scripts/install-az.sh
+      
+      echo "Logging in to Azure with OIDC token..."
+      az login --service-principal --username "$ARM_CLIENT_ID" --tenant "$ARM_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      
+      echo "Setting Azure subscription to $ARM_SUBSCRIPTION_ID..."
+      az account set -s "$ARM_SUBSCRIPTION_ID"
+
       echo "Deploying Function App to dev environment..."
       bash ops/scripts/deploy-function.sh dev
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
-    plugins:
-      - azure-login#v1.0.1:
-          use-identity: true
-          client-id: "${DEV_AZURE_CLIENT_ID}"
 
   - label: ":test_tube: Smoke test dev"
     key: "smoke-dev"
@@ -81,10 +84,6 @@ steps:
       bash ops/scripts/deploy-function.sh prod
     agents:
       queue: "${PROD_DEPLOY_QUEUE}"
-    plugins:
-      - azure-login#v1.0.1:
-          use-identity: true
-          client-id: "${PROD_AZURE_CLIENT_ID}"
 
   - label: ":test_tube: Smoke test prod"
     key: "smoke-prod"
