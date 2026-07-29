@@ -37,15 +37,12 @@ steps:
     depends_on: "package"
     command: |
       az login --service-principal --username "$DEV_AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      az account set -s "$DEV_AZURE_SUBSCRIPTION_ID"
       bash ops/scripts/deploy-function.sh dev
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
     concurrency: 1
     concurrency_group: "${APP_NAME}/dev"
-    plugins:
-      - willdev-ops/buildkite-oidc-azure#v2.0.0:
-          client-id: "${DEV_AZURE_CLIENT_ID}"
-          subscription-id: "${DEV_AZURE_SUBSCRIPTION_ID}"
 
   - label: ":test_tube: Smoke test dev"
     key: "smoke-dev"
@@ -64,15 +61,12 @@ steps:
     depends_on: "approve-prod"
     command: |
       az login --service-principal --username "$PROD_AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      az account set -s "$PROD_AZURE_SUBSCRIPTION_ID"
       bash ops/scripts/deploy-function.sh prod
     agents:
       queue: "${PROD_DEPLOY_QUEUE}"
     concurrency: 1
     concurrency_group: "${APP_NAME}/prod"
-    plugins:
-      - willdev-ops/buildkite-oidc-azure#v2.0.0:
-          client-id: "${PROD_AZURE_CLIENT_ID}"
-          subscription-id: "${PROD_AZURE_SUBSCRIPTION_ID}"
 
   - label: ":test_tube: Smoke test prod"
     key: "smoke-prod"
