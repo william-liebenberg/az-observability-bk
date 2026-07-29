@@ -90,7 +90,7 @@ steps:
       echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${PROD_AZURE_CLIENT_ID} with OIDC token $$BUILDKITE_OIDC_TOKEN"
       echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${PROD_AZURE_CLIENT_ID} with OIDC token $BUILDKITE_OIDC_TOKEN"
 
-      az login --service-principal --username "$$PROD_AZURE_CLIENT_ID" --tenant "$$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      az login --service-principal --username "$$PROD_AZURE_CLIENT_ID" --tenant "$$AZURE_TENANT_ID" --federated-token "$$BUILDKITE_OIDC_TOKEN"
       az account set -s "$$PROD_AZURE_SUBSCRIPTION_ID"
       bash ops/scripts/deploy-function.sh prod
 
