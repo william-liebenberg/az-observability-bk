@@ -21,6 +21,8 @@ steps:
     key: "azure-setup"
     command:
       - "bash ops/scripts/install-az.sh"
+    agents:
+      queue: "${DEV_DEPLOY_QUEUE}"
     retry:
       automatic:
         - exit_status: "*"
@@ -30,6 +32,8 @@ steps:
   - label: "Obtain Azure OIDC token"
     key: "oidc-token"
     depends_on: "azure-setup"
+    agents:
+      queue: "${DEV_DEPLOY_QUEUE}"
     command: |
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
@@ -61,6 +65,8 @@ steps:
     branches: "main"
     depends_on: "deploy-dev"
     command: "bash ops/scripts/smoke-test.sh \"${DEV_SMOKE_URL}\""
+    agents:
+      queue: "${DEV_DEPLOY_QUEUE}"
 
   - block: ":rocket: Deploy to prod"
     key: "approve-prod"
