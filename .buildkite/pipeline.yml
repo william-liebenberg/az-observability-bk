@@ -1,4 +1,6 @@
 env:
+  AZURE_TENANT_ID: "your-azure-tenant-id"
+  
   APP_NAME: "azobservability-funcapp"
   DEV_FUNCTION_APP_NAME: "coffeeobs-func-45hsfjth6qdyi"
   DEV_RESOURCE_GROUP: "rg-coffee-observability"
@@ -15,6 +17,12 @@ env:
 
 steps:
 
+  - label: "Obtain Azure OIDC token"
+    key: "oidc-token"
+    command: |
+      "echo 'Obtaining Azure OIDC token...'"
+      export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
+      
   - label: ":package: Package Function App"
     key: "package"
     command: "bash ops/scripts/package-function.sh"
@@ -27,7 +35,9 @@ steps:
     key: "deploy-dev"
     branches: "main"
     depends_on: "package"
-    command: "bash ops/scripts/deploy-function.sh dev"
+    command: |
+      az login --service-principal --username "$DEV_AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      bash ops/scripts/deploy-function.sh dev
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
     concurrency: 1
@@ -52,7 +62,9 @@ steps:
     key: "deploy-prod"
     branches: "main"
     depends_on: "approve-prod"
-    command: "bash ops/scripts/deploy-function.sh prod"
+    command: |
+      az login --service-principal --username "$PROD_AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
+      bash ops/scripts/deploy-function.sh prod
     agents:
       queue: "${PROD_DEPLOY_QUEUE}"
     concurrency: 1
