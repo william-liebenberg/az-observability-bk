@@ -41,10 +41,10 @@ steps:
     branches: "main"
     depends_on: "package"
     env:
-      ARM_CLIENT_ID: ${DEV_AZURE_CLIENT_ID}
-      BUILDKITE_OIDC_TOKEN: ${BUILDKITE_OIDC_TOKEN}
-      ARM_TENANT_ID: "${AZURE_TENANT_ID}"
-      ARM_SUBSCRIPTION_ID: "${DEV_AZURE_SUBSCRIPTION_ID}"
+      ARM_CLIENT_ID: $DEV_AZURE_CLIENT_ID
+      BUILDKITE_OIDC_TOKEN: $BUILDKITE_OIDC_TOKEN
+      ARM_TENANT_ID: $AZURE_TENANT_ID
+      ARM_SUBSCRIPTION_ID: $DEV_AZURE_SUBSCRIPTION_ID
     command: |
       echo "Installing Azure CLI..."
       bash ops/scripts/install-az.sh
