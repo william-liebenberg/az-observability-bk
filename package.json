@@ -12,10 +12,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.10.0",
     "@azure/functions": "^4.16.2",
-    "@azure/service-bus": "^7.9.5",
-    "@azure/storage-blob": "^12.33.0",
     "applicationinsights": "^2.9.8"
   },
   "devDependencies": {
@@ -24,7 +21,7 @@
     "typescript": "^7.0.2"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "allowScripts": {
     "protobufjs@7.6.5": true
