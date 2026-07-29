@@ -46,7 +46,7 @@ echo "Creating zip package"
 (cd "$package_dir" && zip -qr "../../../${package}" .)
 
 echo "Verifying package contents"
-unzip -Z1 "$package" | grep -qx "host.json"
+unzip -Z1 "$package" host.json >/dev/null
 
 echo "Generating checksum"
 sha256sum "$package" > "$checksum"

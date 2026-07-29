@@ -26,7 +26,7 @@ mkdir -p artifacts
 buildkite-agent artifact download "$package" . --step package
 buildkite-agent artifact download "${package}.sha256" . --step package
 sha256sum --check "${package}.sha256"
-unzip -Z1 "$package" | grep -qx "host.json"
+unzip -Z1 "$package" host.json >/dev/null
 
 azure_cli_version="$(az version --query '"azure-cli"' --output tsv)"
 if [[ "$(printf '%s\n' "2.60.0" "$azure_cli_version" | sort -V | head -n1)" != "2.60.0" ]]; then
