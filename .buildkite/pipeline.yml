@@ -47,8 +47,6 @@ steps:
       bash ops/scripts/deploy-function.sh dev
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
-    concurrency: 1
-    concurrency_group: "${APP_NAME}/dev"
 
   - label: ":test_tube: Smoke test dev"
     key: "smoke-dev"
@@ -74,8 +72,6 @@ steps:
       bash ops/scripts/deploy-function.sh prod
     agents:
       queue: "${PROD_DEPLOY_QUEUE}"
-    concurrency: 1
-    concurrency_group: "${APP_NAME}/prod"
 
   - label: ":test_tube: Smoke test prod"
     key: "smoke-prod"
