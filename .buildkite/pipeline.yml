@@ -24,14 +24,9 @@ steps:
     command: |
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
+      
       echo "Installing Azure CLI..."
       bash ops/scripts/install-az.sh
-      
-      echo "Logging in to Azure with OIDC token..."
-      az login --service-principal --username "$DEV_AZURE_CLIENT_ID" --tenant "$AZURE_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
-      
-      echo "Setting Azure subscription to $DEV_AZURE_SUBSCRIPTION_ID..."
-      az account set -s "$DEV_AZURE_SUBSCRIPTION_ID"
     plugins:
       - azure-login#v1.0.1:
           use-identity: true
