@@ -23,7 +23,7 @@ steps:
       queue: "${DEV_DEPLOY_QUEUE}"
     command: |
       echo 'Obtaining Azure OIDC token...'
-      export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
+      export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
       
   - label: ":package: Package Function App"
     key: "package"
@@ -49,7 +49,7 @@ steps:
       echo "Installing Azure CLI..."
       bash ops/scripts/install-az.sh
       
-      echo "Logging in to Azure with OIDC token..."
+      echo "Logging in to Azure tenant $ARM_TENANT_ID with OIDC token " $BUILDKITE_OIDC_TOKEN
       az login --service-principal --username "$ARM_CLIENT_ID" --tenant "$ARM_TENANT_ID" --federated-token "$BUILDKITE_OIDC_TOKEN"
       
       echo "Setting Azure subscription to $ARM_SUBSCRIPTION_ID..."
