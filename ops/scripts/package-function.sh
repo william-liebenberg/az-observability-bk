@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-sudo apt update
-sudo apt install zip unzip
+echo "Installing zip and unzip"
+apt-get update && apt-get upgrade -y zip unzip
+echo "done installing zip and unzip"
 
 app_name="${APP_NAME:?APP_NAME is required}"
 build_number="${BUILDKITE_BUILD_NUMBER:?BUILDKITE_BUILD_NUMBER is required}"
