@@ -19,7 +19,6 @@ steps:
 
   - label: "Obtain Azure OIDC token"
     key: "oidc-token"
-    depends_on: "azure-setup"
     agents:
       queue: "${DEV_DEPLOY_QUEUE}"
     command: |
