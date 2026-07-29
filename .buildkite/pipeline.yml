@@ -20,15 +20,6 @@ agents:
 
 steps:
 
-  - label: "Obtain Azure OIDC token"
-    key: "oidc-token"
-    agents:
-      queue: "${DEV_DEPLOY_QUEUE}"
-    command: |
-      echo 'Obtaining Azure OIDC token...'
-      export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
-      echo "The OIDC token is: $BUILDKITE_OIDC_TOKEN"
-      
   - label: ":package: Package Function App"
     key: "package"
     depends_on: "oidc-token"
@@ -44,17 +35,20 @@ steps:
     depends_on: "package"
     env:
       ARM_CLIENT_ID: ${DEV_AZURE_CLIENT_ID}
-      BK_OIDC_TOKEN: ${BUILDKITE_OIDC_TOKEN}
       ARM_TENANT_ID: ${AZURE_TENANT_ID}
       ARM_SUBSCRIPTION_ID: ${DEV_AZURE_SUBSCRIPTION_ID}
     command: |      
       echo "Installing Azure CLI..."
       bash ops/scripts/install-az.sh
 
-      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${DEV_AZURE_CLIENT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
-      echo "Logging in to Azure tenant $$ARM_TENANT_ID / $$ARM_CLIENT_ID with OIDC token $$BK_OIDC_TOKEN"
+      echo 'Obtaining Azure OIDC token...'
+      export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
+      echo "The OIDC token is: $BUILDKITE_OIDC_TOKEN"
 
-      az login --service-principal --username "$$ARM_CLIENT_ID" --tenant "$$ARM_TENANT_ID" --federated-token "$$BK_OIDC_TOKEN"
+      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${DEV_AZURE_CLIENT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
+      echo "Logging in to Azure tenant $$ARM_TENANT_ID / $$ARM_CLIENT_ID with OIDC token $$BUILDKITE_OIDC_TOKEN"
+
+      az login --service-principal --username "$$ARM_CLIENT_ID" --tenant "$$ARM_TENANT_ID" --federated-token "$$BUILDKITE_OIDC_TOKEN"
       
       echo "Setting Azure subscription to $$ARM_SUBSCRIPTION_ID"
       az account set -s "$$ARM_SUBSCRIPTION_ID"
