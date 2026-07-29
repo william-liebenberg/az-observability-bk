@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+sudo apt update
+sudo apt install zip unzip
+
 app_name="${APP_NAME:?APP_NAME is required}"
 build_number="${BUILDKITE_BUILD_NUMBER:?BUILDKITE_BUILD_NUMBER is required}"
 commit="${BUILDKITE_COMMIT:?BUILDKITE_COMMIT is required}"
