@@ -29,15 +29,14 @@ steps:
 
   - label: "Obtain Azure OIDC token"
     key: "oidc-token"
+    depends_on: "azure-setup"
     command: |
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
-
-
-
       
   - label: ":package: Package Function App"
     key: "package"
+    depends_on: "oidc-token"
     command: "bash ops/scripts/package-function.sh"
     artifact_paths:
       - "artifacts/*.zip"
