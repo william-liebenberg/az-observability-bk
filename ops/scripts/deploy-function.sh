@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "Installing zip and unzip"
+apt-get update && apt-get install -y zip unzip
+
 environment="${1:?Usage: deploy-function.sh <dev|stage|prod>}"
 case "$environment" in
   dev|stage|prod) ;;
@@ -22,24 +25,30 @@ expected_plan_sku="${!plan_sku_var:?Missing ${plan_sku_var}}"
 expected_subscription="${!subscription_var:?Missing ${subscription_var}}"
 package="artifacts/${APP_NAME:?APP_NAME is required}-${BUILDKITE_BUILD_NUMBER:?BUILDKITE_BUILD_NUMBER is required}.zip"
 
+echo "Deploying Function App ${function_app} in resource group ${resource_group} to Azure subscription ${expected_subscription} with plan SKU ${expected_plan_sku}"
+
+echo "Downloading the package and checksum from the build artifacts"
 mkdir -p artifacts
 buildkite-agent artifact download "$package" . --step package
 buildkite-agent artifact download "${package}.sha256" . --step package
 sha256sum --check "${package}.sha256"
 unzip -Z1 "$package" host.json >/dev/null
 
+echo "Checking Azure CLI version"
 azure_cli_version="$(az version --query '"azure-cli"' --output tsv)"
 if [[ "$(printf '%s\n' "2.60.0" "$azure_cli_version" | sort -V | head -n1)" != "2.60.0" ]]; then
   echo "Azure CLI 2.60.0 or later is required for Flex Consumption deployment; found ${azure_cli_version}" >&2
   exit 1
 fi
 
+echo "Validating Azure subscription"
 active_subscription="$(az account show --query id --output tsv)"
 if [[ "$active_subscription" != "$expected_subscription" ]]; then
   echo "Azure subscription mismatch: expected ${expected_subscription}, found ${active_subscription}" >&2
   exit 1
 fi
 
+echo "Validating Function App hosting plan SKU"
 plan_id="$(az functionapp show \
   --resource-group "$resource_group" \
   --name "$function_app" \
