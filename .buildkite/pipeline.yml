@@ -22,7 +22,6 @@ steps:
 
   - label: ":package: Package Function App"
     key: "package"
-    depends_on: "oidc-token"
     command: "bash ops/scripts/package-function.sh"
     artifact_paths:
       - "artifacts/*.zip"
