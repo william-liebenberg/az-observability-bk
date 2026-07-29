@@ -17,18 +17,6 @@ env:
 
 steps:
 
-  - label: ":azure: Install Azure CLI & Login"
-    key: "azure-setup"
-    command:
-      - "bash ops/scripts/install-az.sh"
-    agents:
-      queue: "${DEV_DEPLOY_QUEUE}"
-    retry:
-      automatic:
-        - exit_status: "*"
-          limit: 2
-    timeout_in_minutes: 10
-
   - label: "Obtain Azure OIDC token"
     key: "oidc-token"
     depends_on: "azure-setup"
