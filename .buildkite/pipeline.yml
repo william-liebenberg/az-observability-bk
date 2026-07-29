@@ -20,7 +20,7 @@ steps:
   - label: "Obtain Azure OIDC token"
     key: "oidc-token"
     command: |
-      "echo 'Obtaining Azure OIDC token...'"
+      echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange" --subject-claim cluster_id)
       
   - label: ":package: Package Function App"
