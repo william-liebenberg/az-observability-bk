@@ -34,25 +34,17 @@ steps:
     key: "deploy-dev"
     branches: "main"
     depends_on: "package"
-    env:
-      ARM_CLIENT_ID: ${DEV_AZURE_CLIENT_ID}
-      ARM_TENANT_ID: ${AZURE_TENANT_ID}
-      ARM_SUBSCRIPTION_ID: ${DEV_AZURE_SUBSCRIPTION_ID}
     command: |      
       echo "Installing Azure CLI..."
       bash ops/scripts/install-az.sh
 
       echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
-      echo "The OIDC token is: $$BUILDKITE_OIDC_TOKEN"
 
-      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${DEV_AZURE_CLIENT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
-      echo "Logging in to Azure tenant $$ARM_TENANT_ID / $$ARM_CLIENT_ID with OIDC token $$BUILDKITE_OIDC_TOKEN"
-
-      az login --service-principal --username "$$ARM_CLIENT_ID" --tenant "$$ARM_TENANT_ID" --federated-token "$$BUILDKITE_OIDC_TOKEN"
+      az login --service-principal --username "$$DEV_AZURE_CLIENT_ID" --tenant "$$AZURE_TENANT_ID" --federated-token "$$BUILDKITE_OIDC_TOKEN"
       
-      echo "Setting Azure subscription to $$ARM_SUBSCRIPTION_ID"
-      az account set -s "$$ARM_SUBSCRIPTION_ID"
+      echo "Setting Azure subscription to $$DEV_AZURE_SUBSCRIPTION_ID"
+      az account set -s "$$DEV_AZURE_SUBSCRIPTION_ID"
 
       echo "Deploying Function App to dev environment..."
       bash ops/scripts/deploy-function.sh dev
@@ -75,21 +67,9 @@ steps:
     key: "deploy-prod"
     branches: "main"
     depends_on: "approve-prod"
-    env:
-      BUILDKITE_OIDC_TOKEN: ${BUILDKITE_OIDC_TOKEN}
     command: |
       bash ops/scripts/install-az.sh
-      echo 'Obtaining Azure OIDC token...'
       export BUILDKITE_OIDC_TOKEN=$(buildkite-agent oidc request-token --audience "api://AzureADTokenExchange")
-
-      echo "The OIDC token is: ${BUILDKITE_OIDC_TOKEN}"
-      echo "The OIDC token is: $$BUILDKITE_OIDC_TOKEN"
-      echo "The OIDC token is: $BUILDKITE_OIDC_TOKEN"
-
-      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${PROD_AZURE_CLIENT_ID} with OIDC token ${BUILDKITE_OIDC_TOKEN}"
-      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${PROD_AZURE_CLIENT_ID} with OIDC token $$BUILDKITE_OIDC_TOKEN"
-      echo "Logging in to Azure tenant ${AZURE_TENANT_ID} / ${PROD_AZURE_CLIENT_ID} with OIDC token $BUILDKITE_OIDC_TOKEN"
-
       az login --service-principal --username "$$PROD_AZURE_CLIENT_ID" --tenant "$$AZURE_TENANT_ID" --federated-token "$$BUILDKITE_OIDC_TOKEN"
       az account set -s "$$PROD_AZURE_SUBSCRIPTION_ID"
       bash ops/scripts/deploy-function.sh prod
